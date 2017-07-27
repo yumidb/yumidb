@@ -1,3 +1,37 @@
+1. 环境准备
+python 需要2.7及以上版本
+scons需要2.3.*版本
+mongo的build文档中提示需要4.8以上gcc，但是测试后发现需要5.3以上
+具体版本及工具安装以机器环境为准,这里列出一些有可能需要的库
+
+yum install gcc -y
+yum install gcc-c++ -y
+yum install wget -y
+yum install bzip2 -y
+yum install zlib -y
+yum install git -y
+
+wget https://downloads.sourceforge.net/project/scons/scons/2.3.5/scons-2.3.5.tar.gz
+解压后进入目执行
+python setup.py  install
+
+wget http://www.netgull.com/gcc/releases/gcc-5.4.0/gcc-5.4.0.tar.bz2
+tar xjvf gcc-5.4.0.tar.bz2
+cd gcc-5.4.0
+./contrib/download_prerequisites 
+mkdir build
+cd build
+../configure --enable-languages=c,c++ --disable-multilib
+make -j
+make install
+echo "/usr/local/lib64" >> /etc/ld.so.conf
+ldconfig
+
+2. 编译mongo
+
+scons --ssl
+
+
 MongoDB README
 
 Welcome to MongoDB 3.4!
