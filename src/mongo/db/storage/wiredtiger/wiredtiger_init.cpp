@@ -96,7 +96,8 @@ public:
                                    params.dur,
                                    ephemeral,
                                    params.repair,
-                                   params.readOnly);
+                                   params.readOnly,
+                                   wiredTigerGlobalOptions.secretKey);
         kv->setRecordStoreExtraOptions(wiredTigerGlobalOptions.collectionConfig);
         kv->setSortedDataInterfaceExtraOptions(wiredTigerGlobalOptions.indexConfig);
         // Intentionally leaked.

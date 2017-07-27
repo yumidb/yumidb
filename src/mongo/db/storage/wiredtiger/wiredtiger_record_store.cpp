@@ -752,6 +752,12 @@ StatusWith<std::string> WiredTigerRecordStore::generateCreateString(
     if (NamespaceString::oplog(ns)) {
         ss << ",oplogKeyExtractionVersion=1";
     }
+
+    if (wiredTigerGlobalOptions.enableEncryption)
+    {
+       ss << ",encryption=(name=cfb)";
+    }
+
     ss << ")";
 
     return StatusWith<std::string>(ss);

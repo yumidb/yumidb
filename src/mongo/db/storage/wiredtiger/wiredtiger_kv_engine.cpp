@@ -187,7 +187,8 @@ WiredTigerKVEngine::WiredTigerKVEngine(const std::string& canonicalName,
                                        bool durable,
                                        bool ephemeral,
                                        bool repair,
-                                       bool readOnly)
+                                       bool readOnly,
+                                       const std::string &encryption)
     : _eventHandler(WiredTigerUtil::defaultEventHandlers()),
       _canonicalName(canonicalName),
       _path(path),
@@ -257,8 +258,21 @@ WiredTigerKVEngine::WiredTigerKVEngine(const std::string& canonicalName,
         // This setting overrides the earlier setting because it is later in the config string.
         ss << ",log=(enabled=false),";
     }
-    string config = ss.str();
-    log() << "wiredtiger_open config: " << config;
+
+    string config;
+
+    if (!encryption.empty())
+    {
+       log() << "wiredtiger_open config(except secret key): " << ss.str();
+       ss << "encryption=(name=cfb,secretkey=" << encryption << "),";
+       config = ss.str();
+    }
+    else
+    {
+       config = ss.str();
+       log() << "wiredtiger_open config: " << config;
+    }
+
     int ret = wiredtiger_open(path.c_str(), &_eventHandler, config.c_str(), &_conn);
     // Invalid argument (EINVAL) is usually caused by invalid configuration string.
     // We still fassert() but without a stack trace.

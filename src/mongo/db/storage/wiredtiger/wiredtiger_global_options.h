@@ -45,7 +45,8 @@ public:
           statisticsLogDelaySecs(0),
           directoryForIndexes(false),
           useCollectionPrefixCompression(false),
-          useIndexPrefixCompression(false){};
+          useIndexPrefixCompression(false),
+          enableEncryption(false){};
 
     Status add(moe::OptionSection* options);
     Status store(const moe::Environment& params, const std::vector<std::string>& args);
@@ -63,6 +64,12 @@ public:
     bool useIndexPrefixCompression;
     std::string collectionConfig;
     std::string indexConfig;
+    bool enableEncryption;
+    std::string keyFile;
+    std::string secretKey;
+
+private:
+    Status parseKey();
 };
 
 extern WiredTigerGlobalOptions wiredTigerGlobalOptions;

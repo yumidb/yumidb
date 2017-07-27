@@ -60,7 +60,8 @@ public:
                        bool durable,
                        bool ephemeral,
                        bool repair,
-                       bool readOnly);
+                       bool readOnly,
+                       const std::string& encryption);
 
     virtual ~WiredTigerKVEngine();
 

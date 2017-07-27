@@ -36,6 +36,8 @@
 #include "mongo/util/log.h"
 #include "mongo/util/options_parser/constraints.h"
 
+#include <fstream>
+
 namespace mongo {
 
 WiredTigerGlobalOptions wiredTigerGlobalOptions;
@@ -107,6 +109,19 @@ Status WiredTigerGlobalOptions::add(moe::OptionSection* options) {
                            "WiredTiger custom index configuration settings")
         .hidden();
 
+    // WiredTiger encryption options
+    wiredTigerOptions
+        .addOptionChaining("storage.wiredTiger.encryptionConfig.enableEncryption",
+                           "wiredTigerEnableEncryption",
+                           moe::Bool,
+                           "WiredTiger enable encryption settings")
+        .setDefault(moe::Value(false));
+
+    wiredTigerOptions
+        .addOptionChaining("storage.wiredTiger.encryptionConfig.encryptionKeyFile",
+                           "wiredTigerEncryptionKeyFile",
+                           moe::String,
+                           "WiredTiger encryption key file settings");
     return options->addSection(wiredTigerOptions);
 }
 
@@ -161,7 +176,49 @@ Status WiredTigerGlobalOptions::store(const moe::Environment& params,
         log() << "Index custom option: " << wiredTigerGlobalOptions.indexConfig;
     }
 
-    return Status::OK();
+    // WiredTiger encryption options
+    if (params.count("storage.wiredTiger.encryptionConfig.enableEncryption")) {
+        wiredTigerGlobalOptions.enableEncryption =
+            params["storage.wiredTiger.encryptionConfig.enableEncryption"].as<bool>();
+        log() << "Enable encryption option: true";
+    }
+    if (params.count("storage.wiredTiger.encryptionConfig.encryptionKeyFile")) {
+        wiredTigerGlobalOptions.keyFile =
+            params["storage.wiredTiger.encryptionConfig.encryptionKeyFile"].as<std::string>();
+        log() << "Encryption key file: ";
+    }
+
+    return wiredTigerGlobalOptions.enableEncryption ?
+           parseKey() : Status::OK();
+}
+
+Status WiredTigerGlobalOptions::parseKey()
+{
+   if (wiredTigerGlobalOptions.keyFile.empty())
+   {
+      return Status(ErrorCodes::InvalidPath, "Key file is unset");
+   }
+   else
+   {
+      try
+      {
+         std::ifstream ifs(wiredTigerGlobalOptions.keyFile, std::ios::in | std::ios::binary);
+         if (ifs.is_open())
+         {
+            std::getline(ifs, wiredTigerGlobalOptions.secretKey);
+            ifs.close();
+         }
+         else
+         {
+            return Status(ErrorCodes::InvalidPath, "key file does not exsit");
+         }
+      }
+      catch (std::exception &e)
+      {
+         return Status(ErrorCodes::InvalidPath, e.what());
+      }
+   }
+   return Status::OK();
 }
 
 }  // namespace mongo

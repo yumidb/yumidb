@@ -833,6 +833,10 @@ extern int zlib_extension_init(WT_CONNECTION *, WT_CONFIG_ARG *);
 #ifdef HAVE_BUILTIN_EXTENSION_ZSTD
 extern int zstd_extension_init(WT_CONNECTION *, WT_CONFIG_ARG *);
 #endif
+#ifdef HAVE_BUILTIN_EXTENSION_CFB
+extern int cfb_extension_init(WT_CONNECTION *, WT_CONFIG_ARG *);
+#endif
+
 
 /*
  * __conn_builtin_extensions --
@@ -853,7 +857,9 @@ __conn_builtin_extensions(WT_CONNECTION_IMPL *conn, const char *cfg[])
 #ifdef HAVE_BUILTIN_EXTENSION_ZSTD
 	WT_RET(__conn_builtin_init(conn, "zstd", zstd_extension_init, cfg));
 #endif
-
+#ifdef HAVE_BUILTIN_EXTENSION_CFB
+        WT_RET(__conn_builtin_init(conn, "cfb", cfb_extension_init, cfg));
+#endif
 	/* Avoid warnings if no builtin extensions are configured. */
 	WT_UNUSED(conn);
 	WT_UNUSED(cfg);

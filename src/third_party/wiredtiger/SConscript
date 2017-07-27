@@ -76,6 +76,7 @@ else:
 
 useZlib = True
 useSnappy = True
+useCFB = True
 
 version_file = 'build_posix/aclocal/version-set.m4'
 
@@ -164,6 +165,10 @@ if useZlib:
 if useSnappy:
     env.Append(CPPDEFINES=['HAVE_BUILTIN_EXTENSION_SNAPPY'])
     wtsources.append("ext/compressors/snappy/snappy_compress.c")
+
+if useCFB:
+    env.Append(CPPDEFINES=['HAVE_BUILTIN_EXTENSION_CFB'])
+    wtsources.append("ext/encryptors/cfb/cfb_encrypt.c")
 
 # Use hardware by default on all platforms if available.
 # If not available at runtime, we fall back to software in some cases.
